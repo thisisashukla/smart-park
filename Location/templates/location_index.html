@@ -1,147 +1,228 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   {% load static %}
-    <link rel="stylesheet" href="{% static "location_static/css/ol.css" %}" type="text/css">
-    <style>
-        .map {
-            height: 400px;
-            width: 400px;
-        }
-    </style>
-    <script src="{% static "location_static/js/v3.19.1/build/ol.js" %}" type="text/javascript"></script>
-    <meta charset="ISO-8859-1">
-    <title>Location Map</title>
+  <title>Map Page</title>
+  <link rel="stylesheet" href="{% static "location_static/css/ol.css" %}" type="text/css" />
+  <style>
+  .map{
+    height:400px;
+    width:400px;
+  }</style>
+  <script src="{% static "location_static/js/v3.19.1/build/ol.js" %}" type="text/javascript"></script>
+  <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
+  <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
 </head>
-
 <body>
-    <h2>User Map</h2>
-    <div id="map" class="map"></div>
-    <label for="s_loc">source location
-    <input type="text" id="s_loc" />
-    </label>
-    <label for="d_loc">destination location
-    <input type="text" id="d_loc" />
-    </label>
-    <input type="text" id="tracking" />
-    <label for="track">track me
-      <input id="track" type="checkbox" />
-    </label>
-    <script>
-    var mousePositionControl = new ol.control.MousePosition({
-        coordinateFormat: ol.coordinate.createStringXY(4),
-        projection: 'EPSG:4326',
-        // comment the following two lines to have the mouse position
-        // be placed within the map.
-        className: 'custom-mouse-position',
-        target: document.getElementById('mouse-position'),
-        undefinedHTML: '&nbsp;'
-      });
+  <div id="map" class="map"></div>
+  <div id="overlay"></div>
+  <div id="source">
+    <label for="source_box">Source Point</label>
+    <input id="source_box" type="text" />
+    <input id="source_btn" type="button" value="Current location as start" />
+  </div>
+  <div id="destination">
+    <label for="destination_box">Destination Point</label>
+    <input id="destination_box" type="text" />
+  </div>
+  <div id="route">
+    <input id="route" type="button" value="Route" />
+  </div>
 
-    var lat=0;
-    var lon=0;
-    var zooml=0;
-    var view=new ol.View({
-      center: ol.proj.fromLonLat([lon, lat]),
-      zoom: zooml
+
+
+  <script type="text/javascript">
+
+  var locations=[,];
+
+  function el(id){
+    return document.getElementById(id);
+  };
+
+  var zoomlevel=5;
+
+
+  var center = ol.proj.transform([80,20], 'EPSG:4326', 'EPSG:3857');
+
+  var view = new ol.View({
+    center: center,
+    zoom: zoomlevel
+  });
+
+  var featureSource = new ol.source.Vector({});
+
+  var layer = [new ol.layer.Tile({
+    source: new ol.source.OSM()
+  }),
+  new ol.layer.Vector({
+    source:featureSource
+  })
+];
+
+  var overlay1=new ol.Overlay({
+    element:el('overlay'),
+    positioning:'bottom-center'
+  });
+
+  var map = new ol.Map({
+    //renderer can be set to 'canvas', 'dom' or 'webgl'
+    renderer: 'canvas',
+    target: 'map',
+    layers: layer,
+    view: view
+  });
+
+  var geocoder=new Geocoder('nomatim',{
+    provider:'osm',
+    key:'',
+    lang:'en-US',
+    placeholder:'Search Destination...',
+    limit:5,
+    keepOpen:false,
+    preventDefault:true
+  });
+
+  var accuracyFeature = new ol.Feature({
+    name:"accuracyFeature"
+  });
+  var positionFeatureStart = new ol.Feature({
+    name:"positionFeatureStart"
+  });
+  var positionFeatureEnd = new ol.Feature({
+    name:"positionFeatureEnd"
+  });
+
+  var pointStyle = new ol.style.Style({
+    image: new ol.style.Circle({
+      radius: 6,
+      fill: new ol.style.Fill({
+        color: '#3399CC'
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#fff',
+        width: 2
+      })
     })
-    var map = new ol.Map({
-      controls: ol.control.defaults({
-          attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-            collapsible: false
-          })
-        }).extend([mousePositionControl]),
-      target: 'map',
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM(),
-        })
-      ],
-      view: view
-    });
-    var geolocation = new ol.Geolocation({
-      projection: view.getProjection()
+  })
+
+  positionFeatureStart.setStyle(pointStyle);
+  positionFeatureEnd.setStyle(pointStyle);
+
+  map.addControl(geocoder);
+
+  geocoder.on('addresschosen', function(evt) {
+    // it's up to you
+    var coordinates=evt.coordinate;
+    console.info(coordinates);
+    var degrees = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+    // format a human readable version
+    var hdms = ol.coordinate.toStringHDMS(degrees);
+
+    el('destination_box').value=hdms;
+
+    positionFeatureEnd.setGeometry(coordinates ?
+      new ol.geom.Point(coordinates) : null);
+      zoom=14;
+    doPan(coordinates);
+
+  });
+
+  var geolocation = new ol.Geolocation({
+    // take the projection to use from the map's view
+    projection: view.getProjection()
+  });
+
+  // listen to changes in position
+  geolocation.on('change', function(evt) {
+    var coordinate=geolocation.getPosition();
+    window.console.log(coordinate);
+    doPan(coordinate);
+
+  });
+
+  geolocation.on('change:accuracyGeometry', function(){
+    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+  });
+
+
+  geolocation.on('change:position', function() {
+    var coordinates = geolocation.getPosition();
+    positionFeatureStart.setGeometry(coordinates ?
+      new ol.geom.Point(coordinates) : null);
+      zoom=14;
+      window.console.log(geolocation.getPosition());
+      doPan(coordinates);
     });
 
-    function el(id) {
+    geolocation.setTracking(true);
 
-      return document.getElementById(id);
+    featureSource.addFeature(accuracyFeature);
+    featureSource.addFeature(positionFeatureStart);
+    featureSource.addFeature(positionFeatureEnd);
+
+
+    var points=[];
+
+
+    map.on('click', function(event){
+
+      var coordinates=event.coordinate;
+      var point= new ol.Feature();
+      point.setStyle(pointStyle);
+
+      point.setGeometry(coordinates ?
+        new ol.geom.Point(coordinates) : null);
+        zoom=14;
+
+      featureSource.addFeature(point);
+      console.log(featureSource.getExtent);
+
+
+    });
+
+  //  new ol.layer.Vector({
+  //    map: map,
+  //    source: new ol.source.Vector({
+  //      features: point
+  //    })
+  //  });
+
+
+
+    //event listeners
+    el('source_btn').addEventListener('click',setCurrentLoc);
+    el('route').addEventListener('click',route);
+
+    function setCurrentLoc(){
+      var coordinates=geolocation.getPosition();
+      var degrees = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+      // format a human readable version
+      var hdms = ol.coordinate.toStringHDMS(degrees);
+      el('source_box').value=hdms;
+      location[0]=coordinates;
+      window.console.log(location)
     }
 
-    el('track').addEventListener('change', trigger);
+    function route(){
+      var layersGroup = map.getLayerGroup()
+      window.console.log(layersGroup);
+      var l=featureSource.length;
+      window.console.log(l);
+    }
 
-
-    var accuracyFeature = new ol.Feature();
-    geolocation.on('change:accuracyGeometry', function() {
-      accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
-    });
-
-
-    var positionFeature = new ol.Feature();
-    positionFeature.setStyle(new ol.style.Style({
-      image: new ol.style.Circle({
-        radius: 6,
-        fill: new ol.style.Fill({
-          color: '#3399CC'
-        }),
-        stroke: new ol.style.Stroke({
-          color: '#fff',
-          width: 2
-        })
-      })
-    }));
-
-    geolocation.on('change:position', function() {
-      var coordinates = geolocation.getPosition();
-      positionFeature.setGeometry(coordinates ?
-          new ol.geom.Point(coordinates) : null);
-          zoom=14;
-          display_co(coordinates,'s_loc');
-    });
-
-    new ol.layer.Vector({
-      map: map,
-      source: new ol.source.Vector({
-        features: [accuracyFeature, positionFeature]
-      })
-    });
-
-    map.on('click', function(event) {
-         // extract the spatial coordinate of the click event in map projection units
-         var coord = event.coordinate;
-         // transform it to decimal degrees
-         var degrees = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
-         // format a human readable version
-         var hdms = ol.coordinate.toStringHDMS(degrees);
-         display_co(coord,'d_loc');
-       });
-    function trigger() {
-      if (el('track').checked == true)
-      {
-        el('tracking').value = 'tracking';
-        geolocation.setTracking(this.checked);
-
-
-      } else{
-        el('tracking').value = 'not tracking';
-        geolocation.setTracking(this.checked);
-      }
-    };
-
-    function display_co(co,id){
-      // extract the spatial coordinate of the click event in map projection units
-          var coord = co;
-          // transform it to decimal degrees
-          var degrees = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
-          // format a human readable version
-          var hdms = ol.coordinate.toStringHDMS(degrees);
-          // update the overlay element's content
-          el(id).value=hdms;
+    function doPan(location) {
+      // pan from the current center
+      var pan = ol.animation.pan({
+        source: map.getView().getCenter()
+      });
+      map.beforeRender(pan);
+      // when we set the new location, the map will pan smoothly to it
+      map.getView().setCenter(location);
+      map.getView().setZoom(12);
     }
 
 
-    </script>
 
+  </script>
 </body>
 </html>
