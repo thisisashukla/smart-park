@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  {% load static %}
   <title>Map Page</title>
-  <link rel="stylesheet" href="{% static "location_static/css/ol.css" %}" type="text/css" />
+  <link rel="stylesheet" href="https://openlayers.org/en/v3.19.1/css/ol.css" type="text/css">
   <style>
   .map{
     height:400px;
     width:400px;
   }</style>
-  <script src="{% static "location_static/js/v3.19.1/build/ol.js" %}" type="text/javascript"></script>
+  <script src="https://openlayers.org/en/v3.19.1/build/ol.js" type="text/javascript"></script>
   <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
   <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
 </head>
@@ -20,6 +19,7 @@
     <label for="source_box">Source Point</label>
     <input id="source_box" type="text" />
     <input id="source_btn" type="button" value="Current location as start" />
+    <input id="current" type="button" value="Go to current location" />
   </div>
   <div id="destination">
     <label for="destination_box">Destination Point</label>
@@ -28,8 +28,6 @@
   <div id="route">
     <input id="route" type="button" value="Route" />
   </div>
-
-
 
   <script type="text/javascript">
 
@@ -82,15 +80,18 @@
     preventDefault:true
   });
 
-  var accuracyFeature = new ol.Feature({
-    name:"accuracyFeature"
+  var geo_accuracy = new ol.Feature({
+    name:"geo_accuracy"
   });
-  var positionFeatureStart = new ol.Feature({
-    name:"positionFeatureStart"
+  geo_accuracy.setId('geo_accuracy');
+  var geo_location = new ol.Feature({
+    name:"geo_location"
   });
-  var positionFeatureEnd = new ol.Feature({
-    name:"positionFeatureEnd"
+  geo_location.setId('geo_location');
+  var address_location = new ol.Feature({
+    name:"address_location"
   });
+  address_location.setId('address_location');
 
   var pointStyle = new ol.style.Style({
     image: new ol.style.Circle({
@@ -105,8 +106,8 @@
     })
   })
 
-  positionFeatureStart.setStyle(pointStyle);
-  positionFeatureEnd.setStyle(pointStyle);
+  geo_location.setStyle(pointStyle);
+  address_location.setStyle(pointStyle);
 
   map.addControl(geocoder);
 
@@ -120,9 +121,10 @@
 
     el('destination_box').value=hdms;
 
-    positionFeatureEnd.setGeometry(coordinates ?
+    address_location.setGeometry(coordinates ?
       new ol.geom.Point(coordinates) : null);
       zoom=14;
+      featureSource.addFeature(address_location);
     doPan(coordinates);
 
   });
@@ -141,13 +143,13 @@
   });
 
   geolocation.on('change:accuracyGeometry', function(){
-    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+    geo_accuracy.setGeometry(geolocation.getAccuracyGeometry());
   });
 
 
   geolocation.on('change:position', function() {
     var coordinates = geolocation.getPosition();
-    positionFeatureStart.setGeometry(coordinates ?
+    geo_location.setGeometry(coordinates ?
       new ol.geom.Point(coordinates) : null);
       zoom=14;
       window.console.log(geolocation.getPosition());
@@ -156,18 +158,20 @@
 
     geolocation.setTracking(true);
 
-    featureSource.addFeature(accuracyFeature);
-    featureSource.addFeature(positionFeatureStart);
-    featureSource.addFeature(positionFeatureEnd);
+    featureSource.addFeature(geo_accuracy);
+    featureSource.addFeature(geo_location);
 
 
-    var points=[];
 
+    var numOfPoints=0;
+    var p="point";
 
     map.on('click', function(event){
 
       var coordinates=event.coordinate;
+      numOfPoints=numOfPoints+1;
       var point= new ol.Feature();
+      point.setId(p.concat(numOfPoints.toString()));
       point.setStyle(pointStyle);
 
       point.setGeometry(coordinates ?
@@ -176,9 +180,7 @@
 
       featureSource.addFeature(point);
       console.log(featureSource.getExtent);
-
-
-    });
+});
 
   //  new ol.layer.Vector({
   //    map: map,
@@ -187,11 +189,15 @@
   //    })
   //  });
 
-
-
     //event listeners
     el('source_btn').addEventListener('click',setCurrentLoc);
     el('route').addEventListener('click',route);
+    el('current').addEventListener('click',setGeoAsCenter);
+
+    function setGeoAsCenter(event){
+      var coordinates=geolocation.getPosition();
+      doPan(coordinates);
+    }
 
     function setCurrentLoc(){
       var coordinates=geolocation.getPosition();
@@ -201,13 +207,19 @@
       el('source_box').value=hdms;
       location[0]=coordinates;
       window.console.log(location)
-    }
+    };
 
     function route(){
-      var layersGroup = map.getLayerGroup()
-      window.console.log(layersGroup);
-      var l=featureSource.length;
-      window.console.log(l);
+      var featureArray = featureSource.getFeatures();
+
+      featureArray.forEach(function(feature){
+        console.log(feature.getGeometry().getCoordinates());
+        var bound_co=map.getView().calculateExtent(map.getSize());
+
+        console.log(bound_co);
+
+
+      });
     }
 
     function doPan(location) {
@@ -219,9 +231,7 @@
       // when we set the new location, the map will pan smoothly to it
       map.getView().setCenter(location);
       map.getView().setZoom(12);
-    }
-
-
+    };
 
   </script>
 </body>

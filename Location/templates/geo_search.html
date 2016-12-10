@@ -3,6 +3,8 @@
   <head>
     {% load static %}
     <title>Geo_Search</title>
+      <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
+	  <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
       <script src="{% static "location_static/js/require.js" %}" type="text/javascript"></script>
       <script data-main="scripts/main.js" src="{% static "location_static/js/require.js" %}" ></script>
   </head>
@@ -16,6 +18,8 @@
     
     </form>
     <script type="text/javascript">
+    
+   
 
     function el(id){
       return document.getElementById(id);

@@ -40,9 +40,25 @@ def Location_search(request):
             
             path='http://www.mapquestapi.com/geocoding/v1/address?key='+'eGaI1nxMkc1QNqsdR1aqlMpa2yLdJbai&inFormat=kvp&outFormat=json'+'&location='+searchstring
             print (path)
+            #jdata = json.load(urllib2.urlopen(path))
+            
+           # print (jdata)
+            
+            print("now using google api")
+            
+            path='https://maps.googleapis.com/maps/api/geocode/json?address='+searchstring+'&key=AIzaSyDhMx80fhKJpvteI_6as-4LMmPnQ4fPkBs'
+            
+            
+            #jdata = json.load(urllib2.urlopen(path))
+            
+            #trying osm
+            path='http://nominatim.openstreetmap.org/search?q='+searchstring+'&format=json&polygon=1&addressdetails=1'
             jdata = json.load(urllib2.urlopen(path))
             
+            
+            
             print (jdata)
+            
             
         return render(request,'geo_search.html')
         

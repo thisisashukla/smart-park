@@ -1,0 +1,14 @@
+Project Goals
+
+1. Selection of sensor type
+2. Configuration of sensors 
+3. Deplyoment of application for data
+   aggregation from sensor network to web server
+4. Registration application for parkings and users
+5. Web application for displaying coordinate data 
+   on web page
+6. Connection application for web pages with database and
+   pgRouting
+7. Application for traffic data
+8. Routing scripts for calculating routes
+9. Application to display the routes on web pages

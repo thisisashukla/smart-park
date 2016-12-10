@@ -1,0 +1,9 @@
+Requirements for Coordinate App:
+
+- Web Map interface
+
+- Database connection
+
+- Interactive ability 
+
+- Real time checking ability
