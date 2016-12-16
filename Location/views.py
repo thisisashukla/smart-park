@@ -64,9 +64,14 @@ def Location_search(request):
         
             
         
-        
-        
+def Location_route(request,num="1",co=['']):
+    #num=request.GET.get('num')
+    print (num) 
+    print(co)
     
+    return HttpResponse('/'.join([num,co]))       
+
+        
         
     
     

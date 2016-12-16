@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  {% load static %}
   <title>Map Page</title>
   <link rel="stylesheet" href="https://openlayers.org/en/v3.19.1/css/ol.css" type="text/css">
   <style>
@@ -11,6 +12,8 @@
   <script src="https://openlayers.org/en/v3.19.1/build/ol.js" type="text/javascript"></script>
   <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
   <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
+  <script src="{% static "location_static/js/jquery-3.1.1.min.js" %}"></script>
+  <script src="{% static "location_static/js/ajax/ajax_script.js" %}"></script>
 </head>
 <body>
   <div id="map" class="map"></div>
@@ -28,6 +31,16 @@
   <div id="route">
     <input id="route" type="button" value="Route" />
   </div>
+  <p>
+    Number of Points selected:<b id="numpoints"></b>
+  </p>
+  <ul id="points_list">
+
+  </ul>
+
+  <b id="num_temp"></b>
+
+
 
   <script type="text/javascript">
 
@@ -76,6 +89,7 @@
     lang:'en-US',
     placeholder:'Search Destination...',
     limit:5,
+    countrycodes:'in',
     keepOpen:false,
     preventDefault:true
   });
@@ -106,6 +120,8 @@
     })
   })
 
+  var numOfPoints=0;
+
   geo_location.setStyle(pointStyle);
   address_location.setStyle(pointStyle);
 
@@ -124,7 +140,9 @@
     address_location.setGeometry(coordinates ?
       new ol.geom.Point(coordinates) : null);
       zoom=14;
-      featureSource.addFeature(address_location);
+
+    add_Feature(coordinates);
+    featureSource.addFeature(address_location);
     doPan(coordinates);
 
   });
@@ -139,6 +157,7 @@
     var coordinate=geolocation.getPosition();
     window.console.log(coordinate);
     doPan(coordinate);
+    add_Feature(coordinate);
 
   });
 
@@ -158,18 +177,21 @@
 
     geolocation.setTracking(true);
 
+
+
+
     featureSource.addFeature(geo_accuracy);
     featureSource.addFeature(geo_location);
 
 
 
-    var numOfPoints=0;
+
     var p="point";
 
     map.on('click', function(event){
 
       var coordinates=event.coordinate;
-      numOfPoints=numOfPoints+1;
+
       var point= new ol.Feature();
       point.setId(p.concat(numOfPoints.toString()));
       point.setStyle(pointStyle);
@@ -178,8 +200,10 @@
         new ol.geom.Point(coordinates) : null);
         zoom=14;
 
+      add_Feature(coordinates);
+
       featureSource.addFeature(point);
-      console.log(featureSource.getExtent);
+      console.log(point.getGeometry().getCoordinates());
 });
 
   //  new ol.layer.Vector({
@@ -191,7 +215,8 @@
 
     //event listeners
     el('source_btn').addEventListener('click',setCurrentLoc);
-    el('route').addEventListener('click',route);
+    //el('route').addEventListener('click',route);
+    el('route').addEventListener('click',ajax_route);
     el('current').addEventListener('click',setGeoAsCenter);
 
     function setGeoAsCenter(event){
@@ -209,18 +234,25 @@
       window.console.log(location)
     };
 
-    function route(){
-      var featureArray = featureSource.getFeatures();
+    //function route(){
+    //  var featureArray = featureSource.getFeatures();
 
-      featureArray.forEach(function(feature){
-        console.log(feature.getGeometry().getCoordinates());
-        var bound_co=map.getView().calculateExtent(map.getSize());
+    //  var mimimum_lat=0;
+  //    var minium_long=0;
+  //    var maximum_lat=0;
+  //    var minimum_long=0;
 
-        console.log(bound_co);
+  //    featureArray.forEach(function(feature){
+  //      console.log(feature.getGeometry().getCoordinates());
+  //      var bound_co=map.getView().calculateExtent(map.getSize());
+
+  //      console.log(bound_co);
 
 
-      });
-    }
+  //    });
+  //  }
+
+
 
     function doPan(location) {
       // pan from the current center
@@ -232,6 +264,56 @@
       map.getView().setCenter(location);
       map.getView().setZoom(12);
     };
+
+    var list_element=document.getElementById('points_list');
+    var coordinate_array=[];
+
+    //TODO: remove bug which adds one point for each address search
+    function add_Feature(coordinates){
+      var entry = document.createElement("li");
+      entry.appendChild(document.createTextNode(coordinates));
+      list_element.appendChild(entry);
+      coordinate_array.push(coordinates);
+      //document.getElementById('list').innerHTML=list_element;
+      numOfPoints+=1;
+      document.getElementById('numpoints').innerHTML=numOfPoints;
+
+
+    };
+
+    function ajax_route(){
+      var ajaxRequest = ajaxFunction();
+      if(ajaxRequest==false){
+        console.log('ajax failed');
+      }
+      else{
+        console.log('ajax success');
+      }
+
+      // Here processRequest() is the callback function.
+      ajaxRequest.onreadystatechange = processRequest;
+
+      //making request
+      var url='/Location/'+document.getElementById('numpoints').innerHTML+'/'+JSON.stringify(coordinate_array);
+      //url='/Location/route';
+      console.log(url);
+      ajaxRequest.open("GET", url, true);
+      ajaxRequest.send(null);
+
+      //console.log(JSON.stringify(coordinate_array));
+    };
+
+    function processRequest() {
+   if (ajaxRequest.readyState == 4) {
+     var ajaxDisplay = document.getElementById('num_temp');
+     ajaxDisplay.innerHTML = ajaxRequest.responseText;
+      if (ajaxRequest.status == 200) {
+         var message = 'failed'
+       }
+     }
+   };
+
+
 
   </script>
 </body>
