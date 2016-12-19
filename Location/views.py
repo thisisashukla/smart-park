@@ -3,10 +3,13 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import urllib2
 import json
+import re
+from . import connector
 
 
 
 from .forms import GeoSeach_Form
+from win32gui import GetCursor
 # Create your views here.
 
 def Location_Main(request):   
@@ -17,7 +20,6 @@ def Location_pgr(request):
 
 def Location_loc(request):
     return render(request,'location_index.html')
-
 
 def Location_search(request):
     
@@ -63,15 +65,27 @@ def Location_search(request):
         return render(request,'geo_search.html')
         
             
-        
 def Location_route(request,num="1",co=['']):
     #num=request.GET.get('num')
     print (num) 
     print(co)
     
+    #getconnection
+    pgcon= connector.postgresConnector('map_data')
+    [conn,cur]=pgcon.getCursor()
+    
+    coordinate_array=re.findall('\d+\.\d+',co)
+    for coo in coordinate_array:
+        print(coo)
+    
+    pgcon.closeConnection(conn, cur)
+    
+    
+    
     return HttpResponse('/'.join([num,co]))       
 
         
+    
         
     
     
