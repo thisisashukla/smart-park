@@ -72,7 +72,7 @@ def Location_route(request,num="1",co=['']):
     
     #getconnection
     pgcon= connector.postgresConnector('map_data')
-    [conn,cur]=pgcon.getCursor()
+    [conn,cur]=pgcon.getConnCur()
     
     coordinate_array=re.findall('\d+\.\d+',co)
     for coo in coordinate_array:

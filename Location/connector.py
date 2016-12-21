@@ -16,7 +16,7 @@ class postgresConnector:
         self.db_port = "5432"
         
     
-    def getCursor(self):
+    def getConnCur(self):
         
         # connect to DB
         conn = psycopg2.connect(host=self.db_host, user=self.db_user, port=self.db_port, password=self.db_passwd, database=self.db_database)
