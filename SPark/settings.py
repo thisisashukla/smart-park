@@ -81,13 +81,23 @@ DATABASES = {
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
   'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'web_data',
         'USER': 'postgres',
-        'PASSWORD': 'foss4gasia',
+        'PASSWORD': '',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
+    },
+  'map_data': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'map_data',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
+             
 }
+
 
 
 # Password validation
