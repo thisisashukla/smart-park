@@ -27,21 +27,6 @@
   <div id="route">
     <input id="route" type="button" value="Route" />
   </div>
-  <p>
-    Number of Points selected:<b id="numpoints"></b>
-  </p>
-  <ul id="points_list">
-    <label for="geolocation_el">Geolocation Coordinates</label>
-    <li id="geolocation_el">
-
-    </li>
-    <label for="Point_el">Point Coordinates</label>
-    <li id="Point_el">
-
-    </li>
-
-  </ul>
-
   <b id="num_temp"></b>
 
 
@@ -51,7 +36,7 @@
 
   var geoloc_array=[];
   var address_array=[];
-  var coordinate_array=[];
+  //var coordinate_array=[];
 
   function el(id){
     return document.getElementById(id);
@@ -182,14 +167,13 @@
       geoloc_array.pop();
       geoloc_array.push(degrees);
     };
-    el('geolocation_el').innerHTML=geoloc_array;
-
     console.log(geoloc_array);
   });
 
   geolocation.on('change:accuracyGeometry', function(){
     geo_accuracy.setGeometry(geolocation.getAccuracyGeometry());
   });
+
 
   geolocation.setTracking(true);
   featureSource.addFeature(geo_accuracy);
@@ -201,10 +185,15 @@
 
 
   geocoder.on('addresschosen', function(evt) {
+    // it's up to you
     var coordinates=evt.coordinate;
     var degrees = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
     console.info(degrees);
+    // format a human readable version
     var hdms = ol.coordinate.toStringHDMS(degrees);
+
+
+
     numOfPoints+=1;
     var point= new ol.Feature();
     point.setId(p.concat(numOfPoints.toString()));
@@ -215,7 +204,6 @@
       zoom=14;
 
     featureSource.addFeature(point);
-    add_Feature(coordinates);
     doPan(coordinates);
   });
   
@@ -226,6 +214,7 @@
 
   function MapClick(event,Sel){
     console.log(SelectedFeature);
+
     if(Sel=="false"){
       console.log('hi')
       var coordinates=event.coordinate;
@@ -239,15 +228,18 @@
         zoom=14;
 
       featureSource.addFeature(point);
-      add_Feature(coordinates);
+    
 
       console.log(point.getGeometry().getCoordinates());
     }
     else if(Sel=="true"){
       if(SelectedID!="geo_location"){
         featureSource.removeFeature(SelectedFeature[0]);
-        console.log(SelectedID);        
+        console.log(coordinate_array)
+        console.log(SelectedID);
       }
+
+
     }
   };
 
@@ -269,6 +261,7 @@ selectClick.on('select', function(e){
     Selected="false";
     SelectedID="";
     SelectedFeature=[];
+
     return;
   }else if(SelectedFeature.length!=0){
     SelectedFeature=e.selected;
@@ -276,13 +269,12 @@ selectClick.on('select', function(e){
     console.log(SelectedFeature[0].getId());
     Selected="true";
     SelectedFeature[0].setStyle(SelectedPointStyle);
-    return;
+      return;
     }
   });
 
     //event listeners
     el('source_btn').addEventListener('click',setCurrentLoc);
-    //el('route').addEventListener('click',route);
     el('route').addEventListener('click',ajax_route);
     el('current').addEventListener('click',setGeoAsCenter);
 
@@ -301,6 +293,7 @@ selectClick.on('select', function(e){
       window.console.log(location)
     };
 
+    
     function doPan(location) {
       // pan from the current center
       var pan = ol.animation.pan({
@@ -312,18 +305,8 @@ selectClick.on('select', function(e){
       map.getView().setZoom(12);
     };
 
-    function add_Feature(coordinates){
-      var degrees = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-      var list_element=document.getElementById('Point_el');
-      coordinate_array.push(degrees);
-      var entry = document.createElement("li");
-      entry.appendChild(document.createTextNode(degrees));
-      list_element.appendChild(entry);
-      el('numpoints').innerHTML=numOfPoints;
-      console.log(featureSource.getFeatures());
 
-    };
-    
+
     function ajax_route(){
       var ajaxRequest = ajaxFunction();
       if(ajaxRequest==false){
@@ -337,22 +320,37 @@ selectClick.on('select', function(e){
       ajaxRequest.onreadystatechange = processRequest;
 
       //making request
-      var url='/Location/'+document.getElementById('numpoints').innerHTML+'/'+JSON.stringify(geoloc_array)+JSON.stringify(coordinate_array);
-      //url='/Location/route';
+      var point_url="";
+      featureSource.getFeatures().forEach(function(element,index,array){
+        
+        if(element.getId()!="geo_accuracy"){
+          point_url=point_url.concat(JSON.stringify((element.getGeometry().getCoordinates())));
+        }
+
+      })
+      console.log('new url');
+      console.log(point_url);
+
+      var url='/Location/'+featureSource.getFeatures().length+'/'+point_url;
+      
       console.log(url);
       ajaxRequest.open("GET", url, true);
       ajaxRequest.send(null);
-      };
+
+      //console.log(JSON.stringify(coordinate_array));
+    };
 
     function processRequest() {
    if (ajaxRequest.readyState == 4) {
-     var ajaxDisplay = document.getElementById('num_temp');
+     var ajaxDisplay = el('num_temp');
      ajaxDisplay.innerHTML = ajaxRequest.responseText;
       if (ajaxRequest.status == 200) {
          var message = 'failed'
        }
      }
    };
+
+
 
   </script>
 </body>
