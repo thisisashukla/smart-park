@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'web_data',
         'USER': 'postgres',
-        'PASSWORD': '',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',
     },
@@ -91,7 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'map_data',
         'USER': 'postgres',
-        'PASSWORD': '',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -142,7 +142,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     # ...
-    ('location_static', 'C:\Users\Ankur\Documents\GitHub\SPark\Location\static')
+    ('location_static', 'C:\Users\MDSharma\Documents\GitHub\SPark\Location\static')
     
 ]
 
