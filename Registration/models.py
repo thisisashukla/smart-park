@@ -4,11 +4,20 @@ from django.db import models
 
 # Create your models here.
 class Parking(models.Model):
-    name=models.CharField(max_length=50)
-    lati=models.FloatField()
-    longi=models.FloatField()
+    ownerName=models.CharField(max_length=50)
+    parkingName=models.CharField(max_length=50)
+    capacity=models.IntegerField()
+    lat=models.FloatField()
+    long=models.FloatField()
 
 class User(models.Model):
-    name=models.CharField(max_length=100)
-    email=models.CharField(max_length=20)
+    user_id = models.AutoField(primary_key=True)
+    fullName=models.CharField(max_length=100)
+    email=models.CharField(max_length=200)
+    password=models.CharField(max_length=200)
+    CITY = (
+        ('Mum', 'Mumbai'),
+        ('Lko', 'Lucknow'),
+    )
+    city = models.CharField(max_length=3, choices=CITY)
     

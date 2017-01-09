@@ -11,6 +11,7 @@ urlpatterns=[
     url(r'^pgr', views.Location_pgr, name='Location_pgr'),
     url(r'^loc',views.Location_loc,name='Location_loc'),
     url(r'^search',views.Location_search,name='Location_search'),
-    url(r'(?P<num>[0-9]+)/(?P<co>\[.*\])',views.Location_route,name='Location_route'),
+    url(r'(?P<num>[0-9]+)/(?P<co>\[.*\])',views.snap_coordinate,name='Location_route'),
+    url(r'(?P<source>[0-9]+)/(?P<target>[0-9]+)',views.route,name='Location_route')
 ]
 

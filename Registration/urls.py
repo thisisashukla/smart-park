@@ -1,14 +1,13 @@
 '''
-Created on 8 Dec 2016
+Created on 09-Jan-2017
 
-@author: Ankur
+@author: MDSharma
 '''
 from django.conf.urls import url
 from . import views
 
 urlpatterns=[
-    url(r'^$', views.Regis_Main, name='Registration_Main'),
-    url(r'^parking', views.Parking, name='Parking'),
-    url(r'^user',views.User,name='User'),
-    
-]
+    url(r'^$', views.Registration_Main, name='Registration_Main'),
+    url(r'^User', views.User_Regis, name='User_Regis'),
+    url(r'^Parking', views.Parking_Regis, name='Parking_Regis')
+    ]
