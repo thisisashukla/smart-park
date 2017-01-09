@@ -3,19 +3,13 @@
 <head>
   {% load static %}
   <title>Map Page</title>
-  <!-- CSS files -->
-  <meta name="viewport" content="width:device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://openlayers.org/en/v3.19.1/css/ol.css" type="text/css">
-  <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
-  <!--<style>
+  <link rel="stylesheet" href="https://openlayers.org/en/v3.20.1/css/ol.css" type="text/css">
+  <!--<script src="{% static "location_static/js/v3.20.1/v3.20.1/css/ol.css" %}"></script>-->
+  <style>
   .map{
-    height:800px;
-    width:800px;
+    height:400px;
+    width:400px;
   }</style>
-  -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="{% static "location_static/js/v3.20.1/v3.20.1/build/ol-debug.js" %}"></script>
   <!--<script src="{% static "location_static/js/ol3-geocoder-v2.4.1/ol3-geocoder/ol3-geocoder.min.css" %}"></script>
   <script src="{% static "location_static/js/ol3-geocoder-v2.4.1/ol3-geocoder/ol3-geocoder.js" %}"></script>-->
@@ -25,37 +19,19 @@
   <script src="{% static "location_static/js/ajax/ajax_script.js" %}"></script>
 </head>
 <body>
-
+  <div id="map" class="map"></div>
   <div id="overlay"></div>
-  <div id="map" class="map" style="width:100%">
-    <nav class="w3-sidenav w3-collapse w3-transparent w3-animate-right" style="width:25%;right:0" id="source_sidenav">
-     <div class="w3-container w3-display-right">
-      <a href="javascript:void(0)" onclick="w3_close()" class="w3-closenav w3-large w3-hide-large" aria-label="close"> Close &times;</a>
-      <br><label for="source_box"><b> Select your source point</b></label>
-      <br><br><input class="w3-input w3-hover-black" id="source_box" type="text"/>
-      <br><br> <button id="source_btn" class="w3-btn w3-light-grey w3-transparent w3-hover-black"><i>Current location as Source </i></button>
-      <br><br> <button id="current" class="w3-btn w3-light-grey w3-transparent w3-hover-black"> <i>Go to current location </i></button>
-      <br><br> <button id="route" class="w3-btn w3-light-grey w3-transparent w3-hover-black"> <i> Get Route</i> </button>
-     </div>
-    </nav>
-  <div class="w3-main" style="margin-left:200px">
-  <header class="w3-container w3-transparent">
-    <span class="w3-opennav w3-black w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</span>
-  </header>
+  <div id="source">
+    <label for="source_box">Source Point</label>
+    <input id="source_box" type="text" />
+    <input id="source_btn" type="button" value="Current location as start" />
+    <input id="current" type="button" value="Go to current location" />
   </div>
+  <div id="route">
+    <input id="route" type="button" value="Route" />
   </div>
-
   <b id="num_temp"></b>
 
-    <script>
-    function w3_open() {
-      //document.getElementById("source_sidenav").style.width = "100%";
-      document.getElementById("source_sidenav").style.display = "block";
-    }
-    function w3_close() {
-      document.getElementById("source_sidenav").style.display = "none";
-    }
-    </script>
 
 
   <script type="text/javascript">
