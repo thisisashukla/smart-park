@@ -1,28 +1,90 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.shortcuts import render_to_response
 from django.shortcuts import render
-from .forms import Reg_User
+
+from . import connector
+from .forms import User_Form
+from .forms import Parking_Form
+from .models import User
+
 # Create your views here.
 
-
-def Regis_Main(request):   
-    return render(request,'Reg_Main.html')
-
-def Parking(request):
-    return render(request,'Reg_Parking.html')
-
-def User(request):
+def Registration_Main(request):
     
     if request.method=='GET':
-        form=Reg_User()
-        return render(request,'Reg_User.html',{'form':form})
+        return render(request,'regis_main.html')
+    
+def User_Regis(request):
+    
+    if request.method=='GET':
+        form=User_Form()
+        
+        return render(request,'user_regis.html',{'form':form})
     
     if request.method=='POST':
-        form=Reg_User(request.POST)
+        print('in post')
+        user_form=User_Form(request.POST)
+        print(user_form)
+        print(user_form.errors)
+        if user_form.is_valid():
+            print('form data valid')
+            user_instance = user_form.save(commit=False)
+            
+            user_instance.name=user_form.cleaned_data['fullName']
+            print(user_instance.name)
+            user_instance.email=user_form.cleaned_data['email']
+            print(user_instance.email)
+            user_instance.password=user_form.cleaned_data['password']
+            print(user_instance.password)
+            user_instance.city=user_form.cleaned_data['city']
+            print(user_instance.city)
+            print('saving data')
+            user_instance.save()
+            context={'from':'User'}
+            return render_to_response('Success.html',context)
+        else:
+            print('data invalid')
+            context={'from':'User'}
+            return render_to_response('Failure.html',context)
+
+
+
+
+def Parking_Regis(request):
+    
+    if request.method=='GET':
+        form=Parking_Form()
         
-        if form.is_valid():
-            name=form.cleaned_data['name']
-            email=form.cleaned_data['email']   
-            return render(request,'User_Success.html',{'name':name,'email':email})
-     
-        
+        return render(request,'parking_regis.html',{'form':form})
+    
+    if request.method=='POST':
+        print('in post')
+        parking_form=Parking_Form(request.POST)
+        print(parking_form)
+        print(parking_form.errors)
+        if parking_form.is_valid():
+            print('form data valid')
+            parking_instance = parking_form.save(commit=False)
+            
+            parking_instance.ownerName=parking_form.cleaned_data['ownerName']
+            print(parking_instance.ownerName)
+            parking_instance.parkingName=parking_form.cleaned_data['parkingName']
+            print(parking_instance.parkingName)
+            parking_instance.capacity=parking_form.cleaned_data['capacity']
+            print(parking_instance.capacity)
+            parking_instance.lat=parking_form.cleaned_data['lat']
+            print(parking_instance.lat)
+            parking_instance.long=parking_form.cleaned_data['long']
+            print(parking_instance.long)
+            print('saving data')
+            parking_instance.save()
+            context={'from':'Parking'}
+            return render_to_response('Success.html',context)
+        else:
+            print('data invalid')
+            context={'from':'Parking'}
+            return render_to_response('Failure.html',context)
+    
+            
+            
