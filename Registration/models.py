@@ -4,11 +4,14 @@ from django.db import models
 
 # Create your models here.
 class Parking(models.Model):
+    parking_id = models.AutoField(primary_key=True)
     ownerName=models.CharField(max_length=50)
     parkingName=models.CharField(max_length=50)
     capacity=models.IntegerField()
     lat=models.FloatField()
     long=models.FloatField()
+ #   class Meta:
+  #      app_label='registration'
 
 class User(models.Model):
     user_id = models.AutoField(primary_key=True)
@@ -20,4 +23,6 @@ class User(models.Model):
         ('Lko', 'Lucknow'),
     )
     city = models.CharField(max_length=3, choices=CITY)
+  #  class Meta:
+   #     app_label='registration'
     

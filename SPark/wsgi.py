@@ -1,5 +1,5 @@
 """
-WSGI config for SPark project.
+WSGI config for SPark_Exp project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

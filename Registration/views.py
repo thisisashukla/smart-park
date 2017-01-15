@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import render
 
-from . import connector
+from SPark import connector
 from .forms import User_Form
 from .forms import Parking_Form
 from .models import User
@@ -39,8 +39,8 @@ def User_Regis(request):
             print(user_instance.password)
             user_instance.city=user_form.cleaned_data['city']
             print(user_instance.city)
-            print('saving data')
             user_instance.save()
+            print('saving data')
             context={'from':'User'}
             return render_to_response('Success.html',context)
         else:
