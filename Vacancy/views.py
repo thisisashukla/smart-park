@@ -59,5 +59,44 @@ def parking_vacancy(request,gsm_id=" ",parkingId=" ",vacancy=0,lat=0.0,long=0.0)
             return HttpResponse(request,context)
                  
             
+def vacancy_feed(request):
+    print('vacancy_feed view')
+    if request.method=='GET':
+        pgcon= connector.postgresConnector('web_data')
+        [conn,cur]=pgcon.getConnCur()    
         
+        query='SELECT park.parking_name,ST_AsGeoJSON(ST_SetSRID(ST_MakePoint(park.long,park.lat),4326)),vac.vacancy from public."Registration_parking" as park, public."Vacancy_vacancy" as vac where vac.parking_id_id=park.parking_id'
+        
+        cur.execute(query)
+        qresult=cur.fetchall()
+        print(qresult)
+        result=[]
+        pointjson='{\"type\": \"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{'
+        append1='\"},\"geometry\":'
+        append2='},{\"type\":\"Feature\",\"properties\":{'
+        result.append(pointjson)
+        print(result)
+        for rows in range(0,len(qresult)-2):
+            print('loop')
+            result.append('\"name\":\"')
+            result.append(str(qresult[rows][0]))
+            #result.append('\",')
+            print(result)
+            result.append('\",\"vacancy\":\"')
+            result.append(str(qresult[rows][2]))
+            result.append(append1)
+            result.append(str(qresult[rows][1]))
+            result.append(append2)
+    
+        result.append('\"name\":\"')
+        result.append(str(qresult[len(qresult)-1][0]))
+        result.append('\",\"vacancy\":\"')
+        result.append(str(qresult[len(qresult)-1][2]))
+        result.append(append1)
+        result.append(str(qresult[len(qresult)-1][1]))
+        result.append('}]}')
+        r = ''.join(str(v) for v in result)
+        print(r)
+        
+        return HttpResponse(r)        
         

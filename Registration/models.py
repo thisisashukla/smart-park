@@ -5,8 +5,8 @@ from django.db import models
 # Create your models here.
 class Parking(models.Model):
     parking_id = models.AutoField(primary_key=True)
-    ownerName=models.CharField(max_length=50)
-    parkingName=models.CharField(max_length=50)
+    owner_name=models.CharField(max_length=50)
+    parking_name=models.CharField(max_length=50)
     capacity=models.IntegerField()
     lat=models.FloatField()
     long=models.FloatField()
@@ -15,7 +15,7 @@ class Parking(models.Model):
 
 class User(models.Model):
     user_id = models.AutoField(primary_key=True)
-    fullName=models.CharField(max_length=100)
+    full_name=models.CharField(max_length=100)
     email=models.CharField(max_length=200)
     password=models.CharField(max_length=200)
     CITY = (
