@@ -117,7 +117,18 @@
     })
   })
 
-  var styles = {
+  var image = new ol.style.Circle({
+        radius: 20,
+        fill: new ol.style.Fill({
+          color: 'red'
+        }),
+        stroke: new ol.style.Stroke({color: 'red', width: 1})
+      });
+
+      var styles = {
+        'Point': new ol.style.Style({
+          image: image
+        }),
         'LineString': new ol.style.Style({
           stroke: new ol.style.Stroke({
             color: 'green',

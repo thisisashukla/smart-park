@@ -30,15 +30,17 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
-    'Registration.apps.RegistrationConfig',
-    'Location.apps.LocationConfig',
+INSTALLED_APPS = [    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'Routing.apps.RoutingConfig',
+    'Registration.apps.RegistrationConfig',
+    'Vacancy.apps.VacancyConfig',
+    'OSM_Connector.apps.OsmConnectorConfig'
 ]
 
 MIDDLEWARE = [
@@ -74,20 +76,27 @@ WSGI_APPLICATION = 'SPark.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+DATABASE_ROUTERS = ['SPark.router.webrouter', 'SPark.router.maprouter']
 
 DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-  'default': {
+    #'default':{},
+     'default':{
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         'NAME': 'web_data',
+         'USER': 'postgres',
+         'PASSWORD': 'postgres',
+         'HOST': 'localhost',
+         'PORT': '5432',
+         },
+    'web_data': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'web_data',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',
-    },
-  'map_data': {
+        },
+    'map_data': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'map_data',
         'USER': 'postgres',
@@ -95,8 +104,8 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
-             
 }
+
 
 
 
@@ -138,11 +147,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
-
 STATICFILES_DIRS = [
     # ...
-    ('location_static', 'C:\Users\MDSharma\Documents\GitHub\SPark\Location\static')
+    ('routing_static', 'C:\Users\MDSharma\Documents\GitHub\SPark\Routing\static')
     
 ]
 
