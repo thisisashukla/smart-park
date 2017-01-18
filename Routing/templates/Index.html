@@ -2,18 +2,19 @@
 <html>
 <head>
   {% load static %}
-  <title>Map Page</title>
+  <title>SPark</title>
   <!-- CSS files -->
   <meta name="viewport" content="width:device-width, initial-scale=1">
   <link rel="stylesheet" href="https://openlayers.org/en/v3.19.1/css/ol.css" type="text/css">
   <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
-  
+
   <!-- SCRIPTS -->
+
   <script src="{% static "routing_static/js/jquery-3.1.1.min.js" %}"></script>
   <script src="{% static "routing_static/js/ajax/ajax_script.js" %}"></script>
   <script src="https://openlayers.org/en/v3.20.1/build/ol-debug.js" type="text/javascript"></script>
   <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
-   
+
   <style>
       .getroute {
         top: 130px;
@@ -34,11 +35,12 @@
 </head>
 <body>
   <div id="overlay"></div>
-  <div id="map" class="map" style="width:100%"></div>  
+  <div id="map" class="map" style="width:100%"></div>
 
   <script type="text/javascript">
   var geoloc_array=[];
   var address_array=[];
+  var routingFlag=false
 
   function el(id){
     return document.getElementById(id);
@@ -51,12 +53,12 @@
     zoom: zoomLevel,
     projection:'EPSG:4326'
   });
-  
+
   var routeRequest=ajaxFunction();
   var source_targetRequest = ajaxFunction();
   var parkingRequest=ajaxFunction();
-  
-  
+
+
   var featureSource = new ol.source.Vector({});
   var osmSource = new ol.source.OSM();
 
@@ -67,7 +69,7 @@
     source:featureSource
   });
   var layer = [featureLayer,osmLayer];
-  
+
   window.app = {};
   var app = window.app;
 
@@ -121,13 +123,16 @@
   ol.inherits(app.GeoCenter, ol.control.Control);
 
   var map = new ol.Map({
-    //renderer can be set to 'canvas', 'dom' or 'webgl'
-    renderer: 'canvas',
-    target: 'map',
-    layers: layer,
-    view: view
-  });
-  
+	    //renderer can be set to 'canvas', 'dom' or 'webgl'
+	    renderer: 'canvas',
+	    target: 'map',
+	    layers: layer,
+	    controls: ol.control.defaults().extend([
+	          new app.Route(),new app.GeoCenter()
+	        ]),
+	    view: view
+	  });
+
   var createTextStyle = function(feature, resolution, dom) {
       var align = 'Center';
       var baseline = 'Baseline';
@@ -171,20 +176,20 @@ return new ol.style.Style({
 };
 
 function parking_layer(){
-console.log("parking_layer in making")
+//console.log("parking_layer in making")
 
 if(parkingRequest==false){
-  console.log('ajax failed');
+  //console.log('ajax failed');
 }
 else{
-  console.log('ajax success');
+  //console.log('ajax success');
 }
 // Here processRequest() is the callback function.
 parkingRequest.onreadystatechange = process_parkingLayerRequest;
 //making request
 url='/Vacancy/Feed_Layer'
 
-console.log(url);
+//console.log(url);
 
 parkingRequest.open("GET", url, true);
 parkingRequest.send(null);
@@ -193,7 +198,7 @@ function process_parkingLayerRequest(){
 if (parkingRequest.readyState == 4){
 
  var geojsonParkingObject=parkingRequest.responseText;
- console.log(geojsonParkingObject)
+ //console.log(geojsonParkingObject)
  var ParkingSource = new ol.source.Vector({
    features: (new ol.format.GeoJSON()).readFeatures(geojsonParkingObject),
    projection:'EPSG:4326'
@@ -203,7 +208,7 @@ if (parkingRequest.readyState == 4){
   source: ParkingSource,
   style: ParkingStyleFunction
 });
-console.log(geojsonParkingObject);
+//console.log(geojsonParkingObject);
 map.addLayer(ParkingLayer);
 
 }
@@ -335,7 +340,7 @@ $(document).on('zoomend', parking_layer);
     geo_location.setGeometry(coordinates ?
       new ol.geom.Point(coordinates) : null);
       zoom=14;
-    window.console.log(coordinates);
+    //console.log(coordinates);
     doPan(coordinates);
     if(geoloc_array.length==0){
       geoloc_array.push(coordinates);
@@ -346,11 +351,18 @@ $(document).on('zoomend', parking_layer);
       geoloc_array.pop();
       geoloc_array.push(coordinates);
     };
-    console.log(geoloc_array);
+    //console.log(geoloc_array);
+
+    if(routingFlag==true){
+    	ajax_route();
+    }
   });
 
   geolocation.on('change:accuracyGeometry', function(){
     geo_accuracy.setGeometry(geolocation.getAccuracyGeometry());
+    if(routingFlag==true){
+    	ajax_route();
+    }
   });
 
   geolocation.setTracking(true);
@@ -381,9 +393,9 @@ $(document).on('zoomend', parking_layer);
   var Selected="false";
 
   function MapClick(event,Sel){
-    console.log(SelectedFeature);
+    //console.log(SelectedFeature);
     if(Sel=="false"){
-      console.log('hi')
+      //console.log('hi')
       var coordinates=event.coordinate;
       numOfPoints+=1;
       var point= new ol.Feature();
@@ -394,27 +406,27 @@ $(document).on('zoomend', parking_layer);
         zoom=14;
       featureSource.addFeature(point);
 
-      console.log(point.getGeometry().getCoordinates());
+      //console.log(point.getGeometry().getCoordinates());
     }
     else if(Sel=="true"){
     	if(SelectedID!="geo_location" && SelectedID!="geo_accuracy"){
         featureSource.removeFeature(SelectedFeature[0]);
-        console.log(SelectedID);
+        //console.log(SelectedID);
       }
     }
   };
 
   map.on('click', function(event){
-    console.log('click')
+    //console.log('click')
     MapClick(event,Selected);
   });
 
   selectClick.on('select', function(e){
-  //console.log('point select');
-  console.log(e.selected);
+  ////console.log('point select');
+  //console.log(e.selected);
   SelectedFeature=e.selected;
   if(SelectedFeature.length==0){
-    console.log('length=0');
+    //console.log('length=0');
     e.deselected[0].setStyle(pointStyle);
     Selected="false";
     SelectedID="";
@@ -423,14 +435,14 @@ $(document).on('zoomend', parking_layer);
   }else if(SelectedFeature.length!=0){
     SelectedFeature=e.selected;
     SelectedID=SelectedFeature[0].getId()
-    console.log(SelectedFeature[0].getId());
+    //console.log(SelectedFeature[0].getId());
     Selected="true";
     SelectedFeature[0].setStyle(SelectedPointStyle);
       return;
     }
   });
 
- 
+
   function setGeoAsCenter(event){
       var coordinates=geolocation.getPosition();
       doPan(coordinates);
@@ -440,7 +452,7 @@ $(document).on('zoomend', parking_layer);
     var coordinates=geolocation.getPosition();
     el('source_box').value=coordinates;
       location[0]=coordinates;
-      window.console.log(location)
+      //console.log(location)
     };
 
   function doPan(location) {
@@ -453,10 +465,10 @@ $(document).on('zoomend', parking_layer);
     function ajax_route(){
 
         if(source_targetRequest==false){
-          console.log('ajax failed');
+          //console.log('ajax failed');
         }
         else{
-          console.log('ajax success');
+          //console.log('ajax success');
         }
         // Here processRequest() is the callback function.
         source_targetRequest.onreadystatechange = processRequest;
@@ -469,36 +481,37 @@ $(document).on('zoomend', parking_layer);
             point_url=point_url.concat(JSON.stringify(element.getGeometry().getCoordinates()));
           }
         })
-        console.log('new url');
-        console.log(point_url);
-        var url='/Location/'+featureSource.getFeatures().length+'/'+point_url;
+        //console.log('new url');
+        //console.log(point_url);
+        var url='/Routing/'+featureSource.getFeatures().length+'/'+point_url;
 
-        console.log(url);
+        //console.log(url);
 
         source_targetRequest.open("GET", url, true);
         source_targetRequest.send(null);
       };
       function processRequest() {
-     if (source_targetRequest.readyState == 4) {
-      var routeUrl ='/Location/'+source_targetRequest.responseText.split(' ')[0]+'/'+source_targetRequest.responseText.split(' ')[1];
-      console.log(routeUrl)
+   if (source_targetRequest.readyState == 4) {
+     //el('num_temp').innerHTML = source_targetRequest.responseText;
+    var routeUrl ='/Routing/'+source_targetRequest.responseText.split(' ')[0]+'/'+source_targetRequest.responseText.split(' ')[1];
+    console.log(routeUrl)
 
-      if(routeRequest==false){
-        console.log('ajax failed');
-      }
-      else{
-        console.log('ajax success');
-      }
-      // Here processRequest() is the callback function.
-      routeRequest.onreadystatechange = processRouteRequest;
+    if(routeRequest==false){
+      console.log('ajax failed');
+    }
+    else{
+      console.log('ajax success');
+    }
+    // Here processRequest() is the callback function.
+    routeRequest.onreadystatechange = processRouteRequest;
 
-      routeRequest.open("GET", routeUrl, true);
-      routeRequest.send(null);
-        if (source_targetRequest.status == 200) {
-           var message = 'failed'
-         }
+    routeRequest.open("GET", routeUrl, true);
+    routeRequest.send(null);
+      if (source_targetRequest.status == 200) {
+         var message = 'failed'
        }
-     };
+     }
+   };
 
      function processRouteRequest(){
        if (routeRequest.readyState == 4){
@@ -511,13 +524,14 @@ $(document).on('zoomend', parking_layer);
           source: RouteSource,
           style: styleFunction
         });
-        console.log(geojsonObject);
+        //console.log(geojsonObject);
         map.addLayer(RouteLayer);
+        routingFlag=true;
 
        }
      };
 
-   
+
   </script>
 </body>
 </html>
