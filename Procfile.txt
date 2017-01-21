@@ -1,1 +1,0 @@
-web: gunicorn SPark.wsgi --log-file -

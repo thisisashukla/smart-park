@@ -99,4 +99,7 @@ def vacancy_feed(request):
         print(r)
         
         return HttpResponse(r)        
-        
+
+
+def vacancy_x(request):
+    print('hi')

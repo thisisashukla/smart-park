@@ -10,8 +10,9 @@ import re
 
 # Create your views here.
 
-def Routing_Main(request):   
-    return render(request,'Index.html')
+def Routing_Main(request):
+    if(request.method=='GET'):
+        return render(request,'Index.html')
 
 def snap_coordinate(request,num="1",co=['']):
     print('hi i am in route view')
