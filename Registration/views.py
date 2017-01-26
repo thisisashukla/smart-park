@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import render
 
-from SPark import connector
+from Application import connector
 from .forms import User_Form
 from .forms import Parking_Form
 from .models import User
@@ -31,7 +31,7 @@ def User_Regis(request):
             print('form data valid')
             user_instance = user_form.save(commit=False)
             
-            user_instance.name=user_form.cleaned_data['fullName']
+            user_instance.name=user_form.cleaned_data['full_name']
             print(user_instance.name)
             user_instance.email=user_form.cleaned_data['email']
             print(user_instance.email)
@@ -67,10 +67,10 @@ def Parking_Regis(request):
             print('form data valid')
             parking_instance = parking_form.save(commit=False)
             
-            parking_instance.ownerName=parking_form.cleaned_data['ownerName']
-            print(parking_instance.ownerName)
-            parking_instance.parkingName=parking_form.cleaned_data['parkingName']
-            print(parking_instance.parkingName)
+            parking_instance.owner_name=parking_form.cleaned_data['owner_name']
+            print(parking_instance.owner_name)
+            parking_instance.parking_name=parking_form.cleaned_data['parking_name']
+            print(parking_instance.parking_name)
             parking_instance.capacity=parking_form.cleaned_data['capacity']
             print(parking_instance.capacity)
             parking_instance.lat=parking_form.cleaned_data['lat']

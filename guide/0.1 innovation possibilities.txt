@@ -1,8 +1,0 @@
-Innovation Possibilities
-
-- Beacons
-
-- Sensor Enhancements
-
-- Bring PgRouting to JavaScript (make it web-based)
-

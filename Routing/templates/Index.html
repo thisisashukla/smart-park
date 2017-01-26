@@ -2,19 +2,19 @@
 <html>
 <head>
   {% load static %}
-  <title>SPark</title>
+  <title>Map Page</title>
   <!-- CSS files -->
   <meta name="viewport" content="width:device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://openlayers.org/en/v3.19.1/css/ol.css" type="text/css">
+  <link rel="stylesheet" href="https://openlayers.org/en/v3.20.1/css/ol.css" type="text/css">
+  <!--<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">-->
   <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
 
-  <!-- SCRIPTS -->
 
-  <script src="{% static "routing_static/js/jquery-3.1.1.min.js" %}"></script>
-  <script src="{% static "routing_static/js/ajax/ajax_script.js" %}"></script>
-  <script src="https://openlayers.org/en/v3.20.1/build/ol-debug.js" type="text/javascript"></script>
+  <!-- SCRIPTS  -->
+  <script src="https://openlayers.org/en/v3.20.1/build/ol.js" type="text/javascript"></script>
+  <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
   <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <style>
       .getroute {
         top: 130px;
@@ -25,7 +25,7 @@
       }
 
       .geocenter {
-        top: 150px;
+        top: 170px;
         left: .5em;
       }
       .ol-touch .geocenter {
@@ -34,19 +34,48 @@
     </style>
 </head>
 <body>
+
   <div id="overlay"></div>
   <div id="map" class="map" style="width:100%"></div>
-
   <script type="text/javascript">
+
+  var ajaxRequest; // The variable that makes Ajax possible!
+  function ajaxFunction() {
+    try {
+
+      // Opera 8.0+, Firefox, Safari
+      ajaxRequest = new XMLHttpRequest();
+      return ajaxRequest;
+    } catch (e) {
+
+      // Internet Explorer Browsers
+      try {
+        ajaxRequest = new ActiveXObject("Msxml2.XMLHTTP");
+        return ajaxRequest;
+      } catch (e) {
+
+        try {
+          ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+          return ajaxRequest;
+        } catch (e) {
+
+          // Something went wrong
+          alert("Your browser broke!");
+          return false;
+        }
+      }
+    }
+  }
+
+
   var geoloc_array=[];
   var address_array=[];
-  var routingFlag=false
-
+  //var coordinate_array=[];
   function el(id){
     return document.getElementById(id);
   };
-
   var zoomLevel=5;
+  //var center = ol.proj.transform([80,20], 'EPSG:4326', 'EPSG:3857');
   var center=[80,20]
   var view = new ol.View({
     center: center,
@@ -54,9 +83,12 @@
     projection:'EPSG:4326'
   });
 
+
+
   var routeRequest=ajaxFunction();
   var source_targetRequest = ajaxFunction();
   var parkingRequest=ajaxFunction();
+
 
 
   var featureSource = new ol.source.Vector({});
@@ -70,163 +102,184 @@
   });
   var layer = [featureLayer,osmLayer];
 
+
+  // var overlay1=new ol.Overlay({
+  //   element:el('overlay'),
+  //   positioning:'bottom-center'
+  // });
   window.app = {};
-  var app = window.app;
+    var app = window.app;
 
-  app.Route = function(opt_options) {
-    var options = opt_options || {};
+    /**
+     * @constructor
+     * @extends {ol.control.Control}
+     * @param {Object=} opt_options Control options.
+     */
+    app.Route = function(opt_options) {
+      var options = opt_options || {};
 
-    var anchor = document.createElement('a');
-    anchor.href = '#GetRoute';
-    anchor.innerHTML = 'R';
+      var anchor = document.createElement('a');
+      anchor.href = '#GetRoute';
+      anchor.innerHTML = 'Show Route';
 
-    var this_ = this;
-
-
+      var this_ = this;
 
 
-    anchor.addEventListener('click', ajax_route, false);
-    anchor.addEventListener('touchstart', ajax_route, false);
 
-    var element = document.createElement('div');
-    element.className = 'getroute ol-unselectable ol-control';
-    element.appendChild(anchor);
 
-    ol.control.Control.call(this, {
-      element: element,
-      target: options.target
-    });
+      anchor.addEventListener('click', ajax_route, false);
+      anchor.addEventListener('touchstart', ajax_route, false);
+
+      var element = document.createElement('div');
+      element.className = 'getroute ol-unselectable ol-control';
+      element.appendChild(anchor);
+
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
 };
-  ol.inherits(app.Route, ol.control.Control);
+    ol.inherits(app.Route, ol.control.Control);
 
-  app.GeoCenter = function(opt_options) {
-    var options = opt_options || {};
+    app.GeoCenter = function(opt_options) {
+      var options = opt_options || {};
 
-    var anchor = document.createElement('a');
-    anchor.href = '#GeoCenter';
-    anchor.innerHTML = 'GC';
+      var anchor = document.createElement('a');
+      anchor.href = '#GeoCenter';
+      anchor.innerHTML = 'Center -> Geo-Location';
 
-    var this_ = this;
+      var this_ = this;
 
-    anchor.addEventListener('click', setGeoAsCenter, false);
-    anchor.addEventListener('touchstart', setGeoAsCenter, false);
+      anchor.addEventListener('click', setGeoAsCenter, false);
+      anchor.addEventListener('touchstart', setGeoAsCenter, false);
 
-    var element = document.createElement('div');
-    element.className = 'geocenter ol-unselectable ol-control';
-    element.appendChild(anchor);
+      var element = document.createElement('div');
+      element.className = 'geocenter ol-unselectable ol-control';
+      element.appendChild(anchor);
 
-    ol.control.Control.call(this, {
-      element: element,
-      target: options.target
-    });
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
 };
-  ol.inherits(app.GeoCenter, ol.control.Control);
+    ol.inherits(app.GeoCenter, ol.control.Control);
 
   var map = new ol.Map({
-	    //renderer can be set to 'canvas', 'dom' or 'webgl'
-	    renderer: 'canvas',
-	    target: 'map',
-	    layers: layer,
-	    controls: ol.control.defaults().extend([
-	          new app.Route(),new app.GeoCenter()
-	        ]),
-	    view: view
-	  });
+    //renderer can be set to 'canvas', 'dom' or 'webgl'
+    renderer: 'canvas',
+    target: 'map',
+    layers: layer,
+    controls: ol.control.defaults().extend([
+          new app.Route(),new app.GeoCenter()
+        ]),
+    view: view
+  });
+
 
   var createTextStyle = function(feature, resolution, dom) {
-      var align = 'Center';
-      var baseline = 'Baseline';
-      var size = '12';
-      var offsetX = 0;
-      var offsetY = 0;
-      var weight = 'Normal';
-      var rotation = 0;
-      var font = weight + ' ' + size + ' ' + 'Arial';
-      var fillColor = '#aa3300';
-      var outlineColor = '#ffffff';
-      var outlineWidth = 3;
+          var align = 'Center';
+          var baseline = 'Baseline';
+          var size = '12';
+          var offsetX = 0;
+          var offsetY = 0;
+          var weight = 'Normal';
+          var rotation = 0;
+          var font = weight + ' ' + size + ' ' + 'Arial';
+          var fillColor = '#aa3300';
+          var outlineColor = '#ffffff';
+          var outlineWidth = 3;
 
-      return new ol.style.Text({
-        textAlign: align,
-        textBaseline: baseline,
-        font: font,
-        text: feature.get('name')+"-"+feature.get("vacancy"),
-        fill: new ol.style.Fill({color: fillColor}),
-        stroke: new ol.style.Stroke({color: outlineColor, width: outlineWidth}),
-        offsetX: offsetX,
-        offsetY: offsetY,
-        rotation: rotation
+          return new ol.style.Text({
+            textAlign: align,
+            textBaseline: baseline,
+            font: font,
+            text: feature.get('name')+"-"+feature.get("vacancy"),
+            fill: new ol.style.Fill({color: fillColor}),
+            stroke: new ol.style.Stroke({color: outlineColor, width: outlineWidth}),
+            offsetX: offsetX,
+            offsetY: offsetY,
+            rotation: rotation
+          });
+        };
+
+
+
+  var ParkingStyleFunction = function(feature) {
+    return new ol.style.Style({
+        image: new ol.style.Circle({
+              radius: 5,
+              fill: new ol.style.Fill({
+                color: 'red'
+              }),
+              stroke: new ol.style.Stroke({color: 'red', width: 1})
+            }),
+            //text: createTextStyle(feature, resolution, myDom.points)
+            text: createTextStyle(feature)
+
       });
-    };
+  };
 
+  function parking_layer(){
+    console.log("parking_layer in making")
 
+    if(parkingRequest==false){
+      console.log('ajax failed');
+    }
+    else{
+      console.log('ajax success');
+    }
+    // Here processRequest() is the callback function.
+    parkingRequest.onreadystatechange = process_parkingLayerRequest;
+    //making request
+    url='/Vacancy/Feed_Layer'
 
-var ParkingStyleFunction = function(feature) {
-return new ol.style.Style({
-    image: new ol.style.Circle({
-          radius: 5,
-          fill: new ol.style.Fill({
-            color: 'red'
-          }),
-          stroke: new ol.style.Stroke({color: 'red', width: 1})
-        }),
-        text: createTextStyle(feature)
+    console.log(url);
 
-  });
-};
+    parkingRequest.open("GET", url, true);
+    parkingRequest.send(null);
+    //console.log(JSON.stringify(coordinate_array));
+  };
+  function process_parkingLayerRequest(){
+   if (parkingRequest.readyState == 4){
 
-function parking_layer(){
-//console.log("parking_layer in making")
+     var geojsonParkingObject=parkingRequest.responseText;
+     console.log(geojsonParkingObject)
+     var ParkingSource = new ol.source.Vector({
+       features: (new ol.format.GeoJSON()).readFeatures(geojsonParkingObject),
+       projection:'EPSG:4326'
+     });
+     //var rSource = new ol.source.GeoJSON({
+    //   object: geojsonObject,
+    //   projection: 'EPSG:3857'
+  //});
+     var ParkingLayer = new ol.layer.Vector({
+      source: ParkingSource,
+      style: ParkingStyleFunction
+    });
+    console.log(geojsonParkingObject);
+    map.addLayer(ParkingLayer);
 
-if(parkingRequest==false){
-  //console.log('ajax failed');
-}
-else{
-  //console.log('ajax success');
-}
-// Here processRequest() is the callback function.
-parkingRequest.onreadystatechange = process_parkingLayerRequest;
-//making request
-url='/Vacancy/Feed_Layer'
+   }
+  };
 
-//console.log(url);
+  //map.getView().on('change:resolution',parking_layer );
 
-parkingRequest.open("GET", url, true);
-parkingRequest.send(null);
-};
-function process_parkingLayerRequest(){
-if (parkingRequest.readyState == 4){
+  map.on('moveend', checknewzoom);
 
- var geojsonParkingObject=parkingRequest.responseText;
- //console.log(geojsonParkingObject)
- var ParkingSource = new ol.source.Vector({
-   features: (new ol.format.GeoJSON()).readFeatures(geojsonParkingObject),
-   projection:'EPSG:4326'
- });
+  function checknewzoom(evt)
+  {
+     var newZoomLevel = map.getView().getZoom();
+     if (newZoomLevel != zoomLevel)
+     {
+        zoomLevel = newZoomLevel;
+        $(document).trigger("zoomend", parking_layer);
+     }
+  }
 
- var ParkingLayer = new ol.layer.Vector({
-  source: ParkingSource,
-  style: ParkingStyleFunction
-});
-//console.log(geojsonParkingObject);
-map.addLayer(ParkingLayer);
+  $(document).on('zoomend', parking_layer
+     //Your code here
+  );
 
-}
-};
-
-map.on('moveend', checknewzoom);
-
-function checknewzoom(evt)
-{
- var newZoomLevel = map.getView().getZoom();
- if (newZoomLevel != zoomLevel)
- {
-    zoomLevel = newZoomLevel;
-    $(document).trigger("zoomend", parking_layer);
- }
-}
-
-$(document).on('zoomend', parking_layer);
 
 
   var geocoder=new Geocoder('nominatim',{
@@ -239,21 +292,17 @@ $(document).on('zoomend', parking_layer);
     keepOpen:false,
     preventDefault:true
   });
-
   var geo_accuracy = new ol.Feature({
     name:"geo_accuracy"
   });
-
   geo_accuracy.setId('geo_accuracy');
   var geo_location = new ol.Feature({
     name:"geo_location"
   });
-
   geo_location.setId('geo_location');
   var address_location = new ol.Feature({
     name:"address_location"
   });
-
   address_location.setId('address_location');
   var pointStyle = new ol.style.Style({
     image: new ol.style.Circle({
@@ -266,8 +315,7 @@ $(document).on('zoomend', parking_layer);
         width: 2
       })
     })
-  });
-
+  })
   var SelectedPointStyle = new ol.style.Style({
     image: new ol.style.Circle({
       radius: 6,
@@ -279,7 +327,7 @@ $(document).on('zoomend', parking_layer);
         width: 2
       })
     })
-  });
+  })
 
   var image = new ol.style.Circle({
         radius: 20,
@@ -289,7 +337,7 @@ $(document).on('zoomend', parking_layer);
         stroke: new ol.style.Stroke({color: 'red', width: 1})
       });
 
-  var styles = {
+      var styles = {
         'Point': new ol.style.Style({
           image: image
         }),
@@ -307,11 +355,11 @@ $(document).on('zoomend', parking_layer);
         })
       };
 
-  var styleFunction = function(feature) {
+      var styleFunction = function(feature) {
         return styles[feature.getGeometry().getType()];
-  };
+      };
 
-//select interaction working on "pointerclick"
+  // select interaction working on "pointerclick"
   var selectClick = new ol.interaction.Select({
     layers:[osmLayer,featureLayer],
     condition: ol.events.condition.pointerMove,
@@ -319,28 +367,23 @@ $(document).on('zoomend', parking_layer);
   })
 
   map.addInteraction(selectClick);
-
   var value = parseInt('0', 10);
   selectClick.setHitTolerance(value);
-
   var numOfPoints=0;
-
   geo_location.setStyle(pointStyle);
   address_location.setStyle(pointStyle);
-
   var geolocation = new ol.Geolocation({
     // take the projection to use from the map's view
     projection: view.getProjection()
   });
-
   // listen to changes in position
   geolocation.on('change', function(evt) {
     var coordinates=geolocation.getPosition();
-
+    //var degrees = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
     geo_location.setGeometry(coordinates ?
       new ol.geom.Point(coordinates) : null);
       zoom=14;
-    //console.log(coordinates);
+    window.console.log(coordinates);
     doPan(coordinates);
     if(geoloc_array.length==0){
       geoloc_array.push(coordinates);
@@ -351,32 +394,23 @@ $(document).on('zoomend', parking_layer);
       geoloc_array.pop();
       geoloc_array.push(coordinates);
     };
-    //console.log(geoloc_array);
-
-    if(routingFlag==true){
-    	ajax_route();
-    }
+    console.log(geoloc_array);
   });
-
   geolocation.on('change:accuracyGeometry', function(){
     geo_accuracy.setGeometry(geolocation.getAccuracyGeometry());
-    if(routingFlag==true){
-    	ajax_route();
-    }
   });
-
   geolocation.setTracking(true);
-
   featureSource.addFeature(geo_accuracy);
   featureSource.addFeature(geo_location);
-
   map.addControl(geocoder);
-
   var p="point";
   geocoder.on('addresschosen', function(evt) {
     // it's up to you
     var coordinates=evt.coordinate;
+    //var degrees = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
     console.info(coordinates);
+    // format a human readable version
+    //var hdms = ol.coordinate.toStringHDMS(degrees);
     numOfPoints+=1;
     var point= new ol.Feature();
     point.setId(p.concat(numOfPoints.toString()));
@@ -388,14 +422,14 @@ $(document).on('zoomend', parking_layer);
     doPan(coordinates);
   });
 
+
   var SelectedFeature=[];
   var SelectedID="";
   var Selected="false";
-
   function MapClick(event,Sel){
-    //console.log(SelectedFeature);
+    console.log(SelectedFeature);
     if(Sel=="false"){
-      //console.log('hi')
+      console.log('hi')
       var coordinates=event.coordinate;
       numOfPoints+=1;
       var point= new ol.Feature();
@@ -406,27 +440,26 @@ $(document).on('zoomend', parking_layer);
         zoom=14;
       featureSource.addFeature(point);
 
-      //console.log(point.getGeometry().getCoordinates());
+      console.log(point.getGeometry().getCoordinates());
     }
     else if(Sel=="true"){
-    	if(SelectedID!="geo_location" && SelectedID!="geo_accuracy"){
+      if(SelectedID!="geo_location" && SelectedID!="geo_accuracy"){
         featureSource.removeFeature(SelectedFeature[0]);
-        //console.log(SelectedID);
+        //console.log(coordinate_array)
+        console.log(SelectedID);
       }
     }
   };
-
   map.on('click', function(event){
-    //console.log('click')
+    console.log('click')
     MapClick(event,Selected);
   });
-
-  selectClick.on('select', function(e){
-  ////console.log('point select');
-  //console.log(e.selected);
+selectClick.on('select', function(e){
+  //console.log('point select');
+  console.log(e.selected);
   SelectedFeature=e.selected;
   if(SelectedFeature.length==0){
-    //console.log('length=0');
+    console.log('length=0');
     e.deselected[0].setStyle(pointStyle);
     Selected="false";
     SelectedID="";
@@ -435,62 +468,64 @@ $(document).on('zoomend', parking_layer);
   }else if(SelectedFeature.length!=0){
     SelectedFeature=e.selected;
     SelectedID=SelectedFeature[0].getId()
-    //console.log(SelectedFeature[0].getId());
+    console.log(SelectedFeature[0].getId());
     Selected="true";
     SelectedFeature[0].setStyle(SelectedPointStyle);
       return;
     }
   });
 
-
-  function setGeoAsCenter(event){
+    function setGeoAsCenter(event){
       var coordinates=geolocation.getPosition();
       doPan(coordinates);
-    };
-
-  function setCurrentLoc(){
-    var coordinates=geolocation.getPosition();
-    el('source_box').value=coordinates;
+    }
+    function setCurrentLoc(){
+      var coordinates=geolocation.getPosition();
+      el('source_box').value=coordinates;
       location[0]=coordinates;
-      //console.log(location)
+      window.console.log(location)
     };
 
-  function doPan(location) {
-    view.animate({
+    function doPan(location) {
+      view.animate({
   		zoom: 12,
   		center: location,
 	  });
     };
 
+
+
+
     function ajax_route(){
 
-        if(source_targetRequest==false){
-          //console.log('ajax failed');
+      if(source_targetRequest==false){
+        console.log('ajax failed');
+      }
+      else{
+        console.log('ajax success');
+      }
+      // Here processRequest() is the callback function.
+      source_targetRequest.onreadystatechange = processRequest;
+      //making request
+      var point_url="";
+      featureSource.getFeatures().forEach(function(element,index,array){
+
+        if(element.getId()!="geo_accuracy"){
+
+          point_url=point_url.concat(JSON.stringify(element.getGeometry().getCoordinates()));
         }
-        else{
-          //console.log('ajax success');
-        }
-        // Here processRequest() is the callback function.
-        source_targetRequest.onreadystatechange = processRequest;
-        //making request
-        var point_url="";
-        featureSource.getFeatures().forEach(function(element,index,array){
+      })
+      console.log('new url');
+      console.log(point_url);
+      var url='/Routing/'+featureSource.getFeatures().length+'/'+point_url;
 
-          if(element.getId()!="geo_accuracy"){
+      console.log(url);
 
-            point_url=point_url.concat(JSON.stringify(element.getGeometry().getCoordinates()));
-          }
-        })
-        //console.log('new url');
-        //console.log(point_url);
-        var url='/Routing/'+featureSource.getFeatures().length+'/'+point_url;
-
-        //console.log(url);
-
-        source_targetRequest.open("GET", url, true);
-        source_targetRequest.send(null);
-      };
-      function processRequest() {
+      source_targetRequest.open("GET", url, true);
+      source_targetRequest.send(null);
+      //console.log(JSON.stringify(coordinate_array));
+    };
+    function processRequest() {
    if (source_targetRequest.readyState == 4) {
      //el('num_temp').innerHTML = source_targetRequest.responseText;
     var routeUrl ='/Routing/'+source_targetRequest.responseText.split(' ')[0]+'/'+source_targetRequest.responseText.split(' ')[1];
@@ -513,23 +548,26 @@ $(document).on('zoomend', parking_layer);
      }
    };
 
-     function processRouteRequest(){
-       if (routeRequest.readyState == 4){
-         var geojsonObject=routeRequest.responseText;
-         var RouteSource = new ol.source.Vector({
-           features: (new ol.format.GeoJSON()).readFeatures(geojsonObject),
-           projection:'EPSG:4326'
-         });
-         var RouteLayer = new ol.layer.Vector({
-          source: RouteSource,
-          style: styleFunction
-        });
-        //console.log(geojsonObject);
-        map.addLayer(RouteLayer);
-        routingFlag=true;
+   function processRouteRequest(){
+     if (routeRequest.readyState == 4){
+       var geojsonObject=routeRequest.responseText;
+       var RouteSource = new ol.source.Vector({
+         features: (new ol.format.GeoJSON()).readFeatures(geojsonObject),
+         projection:'EPSG:4326'
+       });
+       //var rSource = new ol.source.GeoJSON({
+      //   object: geojsonObject,
+      //   projection: 'EPSG:3857'
+//});
+       var RouteLayer = new ol.layer.Vector({
+        source: RouteSource,
+        style: styleFunction
+      });
+      console.log(geojsonObject);
+      map.addLayer(RouteLayer);
 
-       }
-     };
+     }
+   };
 
 
   </script>
