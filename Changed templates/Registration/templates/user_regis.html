@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width" initial-scale=1>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="/static/css/registration.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="/static/css/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<title>SPark- User Registration</title>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<br>
+		</div>
+		<div class="row">
+			<div class="col-sm-4">
+			</div>
+			<div class="col-sm-4">
+				<div class="heading-user-page">
+					<h3> New user!! Please enter your details...</h3>
+				</div>	
+				<div class="center-user-page">
+					<div class="header-logo">
+						<img src="/static/images/logo.jpg" alt="SPark logo">
+					</div>
+					<div class="row">
+						<br><br><br><br><br>
+					</div>
+					<div class="row">
+						<div class="col-sm-2"></div>
+						<div class="col-sm-8">
+							<form action="User" method="POST" id="User_Form">
+							{% csrf_token %} 
+								<div class="form-container-user">
+									<div id="fullName" class="contact">
+										<label class="w3-label w3-validate" for="fullname"> Enter your full name: </label>
+										{{form.fullName}} 
+									</div><br>
+									<div id="email" class="contact">
+										<label class="w3-label w3-validate" for="email"> Enter your e-mail address: </label>
+										{{form.email}} 
+									</div><br>
+									<div id="password" class="contact">
+										<label class="w3-label w3-validate" for="password"> Enter your password: </label>
+										{{form.password}} 
+									</div><br>
+									<div id="city" class="contact">
+										<label class="w3-label w3-validate" for="city"> Please select your city: </label>
+										{{form.city}} 
+									</div><br><br>
+									<input class="w3-btn w3-hover-orange w3-round" type="submit" name="user" value="Save" />
+								</div>
+							</form>	
+						</div>	
+						<div class="col-sm-2"></div>
+					</div>
+				</div>	
+			</div>
+			<div class="col-sm-4">
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-sm-4 github-icon">
+				<a href="https://github.com/daas-ankur-shukla/SPark" target="_blank"><i class="fa fa-github" style="font-size:44px"></i></a>
+			</div>
+			<div class="col-sm-4">
+			</div>
+			<div class="col-sm-4">
+			</div>	
+		</div>
+	</div>	
+</body>
+</html>
