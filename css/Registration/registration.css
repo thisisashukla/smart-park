@@ -1,0 +1,152 @@
+body {
+	background-color: #B5BDD6 ;
+}
+
+*{
+	box-sizing: border;
+}
+
+.center{
+	background-color: white;
+	opacity: 0.9;
+	height: 400px;
+	border: 3px solid black;
+	margin-top:20%;
+
+}
+.center-user-page{
+	background-color: white;
+	height: 500px;
+	width: 95%;
+	border: 3px solid black;
+	margin-top:20%;
+}
+
+.header-logo{
+	margin-top: 10px;
+	margin-left:30%;
+	margin-right:30%;
+	margin-bottom:10px;
+	position: absolute;
+}
+.w3-btn{
+    color: black;
+    width : 80%;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left:5%;
+    position : absolute;
+}
+.video-bg{
+	position:fixed;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	overflow:hidden;
+	z-index:-100;
+}
+
+.video-bg-full{
+	opacity:0.4;
+	position :absolute;
+	top:50%;
+	left:50%;
+	width:auto;
+	height:auto;
+	min-height: 100%;
+	min-width:100%;
+	-webkit-transform:translate(-50%, -50%);
+	-moz-transform: translate(-50%,50%);
+	-ms-transform : translate(-50%, -50%);
+	transform: translate(-50%,-50%);
+}
+
+@media(max-width:767px){
+	.video-bg{
+		background: url('F:/Workspace/SPark_Exp/Registration/static/images/logo.jpg') center center / cover no-repeat;
+	}
+
+	.video-bg-full{
+		display :none;
+	}
+}
+
+.heading-user-page{
+	font-size: 24px;
+	font-style: italic;
+	font-family: Arial;
+}
+
+.heading-parking-page{
+	font-size: 24px;
+	font-style: italic;
+	font-family: Arial;
+	margin-left:20%;	
+}
+
+.fullname{
+	font-size: 24px;
+	font-family: Times;
+}
+.github-icon{
+}
+
+.form-container-user{
+	background-color: white;
+	height: 80%;
+	margin-left : 3%;
+}
+
+.contact{
+	border:1%;
+
+}
+.center-parking-page{
+	background-color: white;
+	height: 500px;
+	border: 3px solid black;
+	margin-top:15%;
+
+}
+
+.form-container-parking{
+	background-color: white;
+	height: 80%;
+	margin-top: 3%;
+	margin-left: 2%;
+}
+
+.map-centre-parking-page {
+	height: 500px;
+	border: 3px solid black;
+	margin-top:15%;	
+}
+.logo-parking-page{
+	margin-left:34%;
+	margin-top: 5px;
+	margin-bottom:5px;
+}
+
+.success-caption,.failure-caption {
+	margin:20px;
+	font-family: Times;
+	font-size:32px;
+}
+
+#hello-failure,#hello-success{
+	font-family: Times;
+	font-size: 36px;
+}
+
+#failure-context-from-django,#success-context-from-django{
+	font-size: 32px;	
+}
+
+
+
+
+
